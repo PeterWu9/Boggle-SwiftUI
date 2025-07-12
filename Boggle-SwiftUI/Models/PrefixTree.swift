@@ -40,3 +40,20 @@ final class PrefixTree<SomeCollection: RangeReplaceableCollection> where SomeCol
         }
     }
 }
+
+// MARK: Codable Conformance
+
+// Attempt to make PrefixTree Codable if the Collections are codable
+//extension PrefixTree: Codable where SomeCollection: Codable { }
+
+// Attempt to make PrefixTree<String> Codable by converting characters to string
+extension PrefixTree: Encodable where SomeCollection == String {
+    func encode(to encoder: any Encoder) throws {
+        var container = encoder.unkeyedContainer()
+        for child in children {
+            let keyAsString = String(child.key)
+            let newChid = [keyAsString: child.value]
+            try container.encode(newChid)
+        }
+    }
+}

@@ -19,7 +19,11 @@ enum Words {
                 throw Error.invalidURL
             }
             let words = try JSONDecoder().decode([String].self, from: try Data(contentsOf: json))
-            return PrefixTree<String>(elements: words.filter(predicate))
+            
+            let tree = PrefixTree(elements: words.filter(predicate))
+            // Encode tree into data
+            let data = try JSONEncoder().encode(tree)
+            return tree
         }.value
     }
 }
