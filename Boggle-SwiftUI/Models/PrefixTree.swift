@@ -18,6 +18,11 @@ final class PrefixTree<SomeCollection: RangeReplaceableCollection> where SomeCol
         elements.forEach { self.insert($0) }
     }
     
+    init(children: [Element: PrefixTree], isTerminal: Bool) {
+        self.children = children
+        self.isTerminal = isTerminal
+    }
+    
     func insert(_ collection: SomeCollection) {
         terminalNode(for: collection, shouldInsert: true)?.isTerminal = true
     }
@@ -60,5 +65,17 @@ extension PrefixTree: Encodable where SomeCollection == String {
         }
         try container.encode(isTerminal, forKey: .isTerminal)
         try container.encode(newChildren, forKey: .children)
+    }
+}
+
+extension PrefixTree: Decodable where SomeCollection == String {
+    convenience init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let isTerminal = try container.decode(Bool.self, forKey: .isTerminal)
+        let childrenKeyedByString = try container.decode([String: PrefixTree].self, forKey: .children)
+        let children = childrenKeyedByString.reduce(into: [Character: PrefixTree]()) { accumulated, next in
+            accumulated[Character(next.key)] = next.value
+        }
+        self.init(children: children, isTerminal: isTerminal)
     }
 }
