@@ -48,12 +48,17 @@ final class PrefixTree<SomeCollection: RangeReplaceableCollection> where SomeCol
 
 // Attempt to make PrefixTree<String> Codable by converting characters to string
 extension PrefixTree: Encodable where SomeCollection == String {
+    enum CodingKeys: String, CodingKey {
+        case children
+        case isTerminal
+    }
+    
     func encode(to encoder: any Encoder) throws {
-        var container = encoder.unkeyedContainer()
-        for child in children {
-            let keyAsString = String(child.key)
-            let newChid = [keyAsString: child.value]
-            try container.encode(newChid)
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        let newChildren = children.reduce(into: [String: Self]()) { accumulated, next in
+            accumulated[String(next.key)] = next.value
         }
+        try container.encode(isTerminal, forKey: .isTerminal)
+        try container.encode(newChildren, forKey: .children)
     }
 }
