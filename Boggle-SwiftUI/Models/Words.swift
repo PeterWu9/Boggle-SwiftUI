@@ -15,16 +15,18 @@ enum Words {
     }
     
     static func fileUrl() throws -> URL {
-        let directoryURL = try FileManager.default.url(
-            for: .applicationSupportDirectory,
-            in: .userDomainMask,
-            appropriateFor: nil,
-            create: true
-        )
-        return directoryURL.appendingPathComponent("dictionary")
+//        let directoryURL = try FileManager.default.url(
+//            for: .applicationSupportDirectory,
+//            in: .userDomainMask,
+//            appropriateFor: nil,
+//            create: true
+//        )
+//        return directoryURL.appendingPathComponent("dictionary")
         // TODO:  Why doesn't this work (will first change target to 16.0)?
         // app will crash - file url not found
-        // let url = URL.applicationSupportDirectory.appending(path: "dictionary")
+        let url = URL.applicationSupportDirectory
+        try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
+        return url.appending(path: "dictionary")
     }
     
     static func load(filter predicate: @escaping (String) -> Bool) async throws -> PrefixTree<String> {
@@ -53,9 +55,6 @@ enum Words {
             do {
                 // Encode tree into data
                 let data = try JSONEncoder().encode(tree)
-                // TODO:  Why do you need to create application support directory?
-                // create directory
-                
                 // Save data to directory
                 try data.write(to: fileUrl())
                 print(#function, "Data saved to disk")
